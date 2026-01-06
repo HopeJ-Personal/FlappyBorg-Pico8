@@ -169,8 +169,10 @@ function draw_bg()
 end
 
 function bg_shift()
-	for item in all(bg_obj_list) do
-		item.x-=1
+	if g.frz==false then
+		for item in all(bg_obj_list) do
+			item.x-=1
+		end
 	end
 end
 
