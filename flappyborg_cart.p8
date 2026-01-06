@@ -118,12 +118,7 @@ end
 -->8
 -- background --
 
--- tab ideas:
--- scenes --
--- borg --
--- tower --
--- collisions --
-
+-- init variables for obj management and spawning
 bg_obj_list = {}
 bg_screen_twidth = 16 -- tile width
 bg_screen_pwidth = bg_screen_twidth*8
@@ -133,6 +128,9 @@ bg_obj_spawntimer = 0
 bg_sx = 128 -- start x
 bg_sy = 120 -- start y
 
+-- initialize scene objects
+--  (first buildings and roads
+--  the player sees)
 bg2_obj_list = {}
 function bg2_init()
 	bg_cx = bg_sx
@@ -148,13 +146,20 @@ function bg2_init()
 		item = {t="r",x=bg_cx,y=bg_cy,speed=1,dir=0}
 		add(bg2_obj_list,item)
 		
-		-- move to next
+		-- move to next pos for obj init
 		bg_cx -= bg_obj_width
 	end
 end
 
+-- shift obj
 halftimer = 0
 function bg2_shift()
+ -- now with variable speed
+ -- control to allow things
+ -- like the road and
+ -- buildings moving at dif
+ -- speeds to give a
+ -- parralax effect
 	if halftimer == 0 then
 		halftimer = 1
 	elseif halftimer == 1 then
@@ -185,6 +190,7 @@ function bg2_shift()
 	end
 end
 
+-- spawn new obj to replace oob obj(s)
 function bg2_new(t)
 	-- speed = px moved
 	-- dir = direction
@@ -204,7 +210,11 @@ function bg2_new(t)
 end
 
 function bg2_prune()
-for item in all(bg2_obj_list) do
+	-- del obj out of bounds and
+	-- spawn new obj to
+	-- preserve 1 continious
+	-- scene illusion
+	for item in all(bg2_obj_list) do
 		if item.x < -7 then
 			del(bg2_obj_list,item)
 			bg2_new(item.t)
@@ -212,25 +222,36 @@ for item in all(bg2_obj_list) do
 	end
 end
 
+-- turn the obj list into visual sprites
+--  (or table intepreter and spr spawner)
 function bg2_draw()
 	for item in all(bg2_obj_list) do
+		-- roads
+		
 		if item.t == "r" then
 			-- spawn road sprite
 			spr(22,item.x,item.y)
 		
+		-- buildings
 		elseif item.t == "b" then
-			-- set varient sprites 
+			-- step 1:
+			--  set sprites per varient
+			
+			-- varient 0 - grey building 
 			if item.varient == 0 then
 				sprid_btm_noroof = 51
 				sprid_btm_wroof = 67
 				sprid_mio = 35
 				sprid_top = 19
-			end
-			if item.varient == 1 then
+			
+			-- varient 1 - green building
+			elseif item.varient == 1 then
 				sprid_btm_noroof = 52
 				sprid_btm_wroof = 68
 				sprid_mio = 36
 				sprid_top = 20
+				
+			-- varient 2 -- tan building
 			elseif item.varient == 2 then
 				sprid_btm_noroof = 53
 				sprid_btm_wroof = 69
@@ -238,7 +259,8 @@ function bg2_draw()
 				sprid_top = 21
 			end
 			
-			-- gen building
+			-- step 2:
+			--  gen building
 			if item.height == 0 then
 				spr(sprid_btm_wroof,item.x,item.y-8)
 			end
@@ -264,6 +286,12 @@ function plr_shift()
 end
 
 function plr_new()
+	-- item
+	--  x
+	--  y
+	--  speed
+	--  gap_size? (unsure how ill code gen rn)
+	--  gap_height? (unsure how ill code gen rn)
 end
 
 function plr_prune()
@@ -272,6 +300,7 @@ end
 function plr_draw()
 end
 
+-- functions required:
 --init
 --shift
 --new
