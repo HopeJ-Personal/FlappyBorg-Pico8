@@ -33,7 +33,7 @@ function _update()
 	bg_shift()
 	bg2_shift()
 	bg_prune()
-	--bg2_prune()
+	bg2_prune()
 	sprite_control()
 	if ftimer > 0 then
 		ftimer -= 1
@@ -146,11 +146,11 @@ function bg2_init()
 		-- building
 		temp_var=flr(rnd(3))
 		temp_height=flr(rnd(bg_obj_mt_height))
-		item = {t="b",x=bg_sx,y=bg_sy,varient=temp_var,height=temp_height,speed=1,dir=0}
+		item = {t="b",x=bg_cx,y=bg_cy,varient=temp_var,height=temp_height,speed=0.5,dir=0}
 		add(bg2_obj_list,item)
 		
 		-- road
-		item = {t="r",x=bg_sx,y=bg_sy,speed=0.5,dir=0}
+		item = {t="r",x=bg_cx,y=bg_cy,speed=1,dir=0}
 		add(bg2_obj_list,item)
 		
 		-- move to next
@@ -167,9 +167,9 @@ function bg2_shift()
 	end
 	if g.frz==false then
 		for item in all(bg2_obj_list) do
-			item.x-=1
+			--item.x-=1
 			if item.dir == 0 then
-				if speed == 0.5 then
+				if itemspeed == 0.5 then
 					if halftimer == 1 then
 						item.x-=item.speed
 					end
@@ -178,7 +178,7 @@ function bg2_shift()
 				end
 			end
 			if item.dir == 1 then
-				if speed == 0.5 then
+				if item.speed == 0.5 then
 					if halftimer == 1 then
 						item.x-=item.speed
 					end
@@ -199,20 +199,20 @@ function bg2_new(t)
 		-- building
 		temp_var=flr(rnd(3))
 		temp_height=flr(rnd(bg_obj_mt_height))
-		item = {t="b",x=bg_sx,y=bg_sy,varient=temp_var,height=temp_height,speed=1,dir=0}
+		item = {t="b",x=bg_sx,y=bg_sy,varient=temp_var,height=temp_height,speed=0.5,dir=0}
 		add(bg2_obj_list,item)
 	elseif t == "r" then
 		-- road
-		item = {t="r",x=bg_sx,y=bg_sy,speed=0.5,dir=0}
+		item = {t="r",x=bg_sx,y=bg_sy,speed=1,dir=0}
 		add(bg2_obj_list,item)
 	end
 end
 
 function bg2_prune()
 for item in all(bg2_obj_list) do
-		if item.x < -7 do
+		if item.x < -7 then
 			del(bg2_obj_list,item)
-			bg2_spawn()
+			bg2_new(item.t)
 		end
 	end
 end
@@ -223,20 +223,20 @@ function bg2_draw()
 			-- spawn road sprite
 			spr(22,item.x,item.y)
 		
-		else if item.t == "b" then
+		elseif item.t == "b" then
 			-- set varient sprites 
-			if item.varient == 0 do
+			if item.varient == 0 then
 				sprid_btm_noroof = 51
 				sprid_btm_wroof = 67
 				sprid_mio = 35
 				sprid_top = 19
 			end
-			if item.varient == 1 do
+			if item.varient == 1 then
 				sprid_btm_noroof = 52
 				sprid_btm_wroof = 68
 				sprid_mio = 36
 				sprid_top = 20
-			elseif item.varient == 2 do
+			elseif item.varient == 2 then
 				sprid_btm_noroof = 53
 				sprid_btm_wroof = 69
 				sprid_mio = 37
@@ -244,21 +244,20 @@ function bg2_draw()
 			end
 			
 			-- gen building
-			if item.height == 0 do
+			if item.height == 0 then
 				spr(sprid_btm_wroof,item.x,item.y-8)
 			end
-			if item.height > 0 do
+			if item.height > 0 then
 				spr(sprid_btm_noroof,item.x,item.y-8)
-				if item.height < 2 do
+				if item.height < 2 then
 					spr(sprid_top,item.x,item.y-16)
-				elseif item.height == 2 do
+				elseif item.height == 2 then
 					spr(sprid_mio,item.x,item.y-16)
 					spr(sprid_top,item.x,item.y-24)
 				end
 			end
 		end
 	end
-end
 end
 
 function init_bg()
@@ -275,18 +274,18 @@ end
 
 function draw_bg()
 	for item in all(bg_obj_list) do
-		if item.varient == 0 do
+		if item.varient == 0 then
 			sprid_btm_noroof = 51
 			sprid_btm_wroof = 67
 			sprid_mio = 35
 			sprid_top = 19
 		end
-		if item.varient == 1 do
+		if item.varient == 1 then
 			sprid_btm_noroof = 52
 			sprid_btm_wroof = 68
 			sprid_mio = 36
 			sprid_top = 20
-		elseif item.varient == 2 do
+		elseif item.varient == 2 then
 			sprid_btm_noroof = 53
 			sprid_btm_wroof = 69
 			sprid_mio = 37
@@ -298,25 +297,25 @@ function draw_bg()
 		--sprid_top = 19
 		
 		spr(22,item.x,item.y)
-		--if item.height == 0 do
+		--if item.height == 0 then
 		--	spr(sprid_btm_wroof,item.x,item.y-8) -- bottom floor with roof
-		--elseif item.height > 0 do
+		--elseif item.height > 0 then
 		--	spr(sprid_btm_noroof,item.x,item.y) -- bottom floor no roof
-		--	if item.height == 2 do
+		--	if item.height == 2 then
 		--		spr(sprid_mio,item.x,item.y-16) -- mid floor
 		--		spr(sprid_top,item.x,item.y-24) -- top floor
 		--	else
 		--		spr(sprid_top,item.x,item.y-16) -- top floo
 		--	end
 		--end
-		if item.height == 0 do
+		if item.height == 0 then
 			spr(sprid_btm_wroof,item.x,item.y-8)
 		end
-		if item.height > 0 do
+		if item.height > 0 then
 			spr(sprid_btm_noroof,item.x,item.y-8)
-			if item.height < 2 do
+			if item.height < 2 then
 				spr(sprid_top,item.x,item.y-16)
-			elseif item.height == 2 do
+			elseif item.height == 2 then
 				spr(sprid_mio,item.x,item.y-16)
 				spr(sprid_top,item.x,item.y-24)
 			end
@@ -341,7 +340,7 @@ end
 
 function bg_prune()
 	for item in all(bg_obj_list) do
-		if item.x < -7 do
+		if item.x < -7 then
 			del(bg_obj_list,item)
 			bg_spawnnew(item.t)
 		end
