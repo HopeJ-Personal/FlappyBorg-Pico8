@@ -23,6 +23,7 @@ function _init()
 	g.scr=0 -- current score
 	g.frz = false -- freeze state
 	init_bg()
+	bg2_init()
 end
 
 function _update()
@@ -30,7 +31,9 @@ function _update()
 	phys()
 	collission()
 	bg_shift()
+	bg2_shift()
 	bg_prune()
+	--bg2_prune()
 	sprite_control()
 	if ftimer > 0 then
 		ftimer -= 1
@@ -42,8 +45,14 @@ function _draw()
 	map()
 	spr(p.spid,p.x,p.y)
 	print("y: "..p.y, 1, 1)
+	print(bg_obj_list[1].x)
+	print(bg2_obj_list[1].t)
+	print(bg2_obj_list[1].x)
+	print(bg2_obj_list[1].y)
+	print(bg2_obj_list[1].speed)
 	scenes()
-	draw_bg()
+	--draw_bg()
+	bg2_draw()
 end
 -->8
 -- scenes --
@@ -129,6 +138,129 @@ bg_obj_spawntimer = 0
 bg_sx = 128 -- start x
 bg_sy = 120 -- start y
 
+bg2_obj_list = {}
+function bg2_init()
+	bg_cx = bg_sx
+	bg_cy = bg_sy
+	for i = 0,(bg_screen_pwidth/bg_obj_width) do
+		-- building
+		temp_var=flr(rnd(3))
+		temp_height=flr(rnd(bg_obj_mt_height))
+		item = {t="b",x=bg_sx,y=bg_sy,varient=temp_var,height=temp_height,speed=1,dir=0}
+		add(bg2_obj_list,item)
+		
+		-- road
+		item = {t="r",x=bg_sx,y=bg_sy,speed=0.5,dir=0}
+		add(bg2_obj_list,item)
+		
+		-- move to next
+		bg_cx -= bg_obj_width
+	end
+end
+
+halftimer = 0
+function bg2_shift()
+	if halftimer == 0 then
+		halftimer = 1
+	elseif halftimer == 1 then
+		halftimer = 0
+	end
+	if g.frz==false then
+		for item in all(bg2_obj_list) do
+			item.x-=1
+			if item.dir == 0 then
+				if speed == 0.5 then
+					if halftimer == 1 then
+						item.x-=item.speed
+					end
+				else
+					item.x-=item.speed
+				end
+			end
+			if item.dir == 1 then
+				if speed == 0.5 then
+					if halftimer == 1 then
+						item.x-=item.speed
+					end
+				else
+					item.x+=item.speed
+				end
+			end
+		end
+	end
+end
+
+function bg2_new(t)
+	-- speed = px moved
+	-- dir = direction
+	--  0 = left (-)
+	--  1 = right (+)
+	if t == "b" then
+		-- building
+		temp_var=flr(rnd(3))
+		temp_height=flr(rnd(bg_obj_mt_height))
+		item = {t="b",x=bg_sx,y=bg_sy,varient=temp_var,height=temp_height,speed=1,dir=0}
+		add(bg2_obj_list,item)
+	elseif t == "r" then
+		-- road
+		item = {t="r",x=bg_sx,y=bg_sy,speed=0.5,dir=0}
+		add(bg2_obj_list,item)
+	end
+end
+
+function bg2_prune()
+for item in all(bg2_obj_list) do
+		if item.x < -7 do
+			del(bg2_obj_list,item)
+			bg2_spawn()
+		end
+	end
+end
+
+function bg2_draw()
+	for item in all(bg2_obj_list) do
+		if item.t == "r" then
+			-- spawn road sprite
+			spr(22,item.x,item.y)
+		
+		else if item.t == "b" then
+			-- set varient sprites 
+			if item.varient == 0 do
+				sprid_btm_noroof = 51
+				sprid_btm_wroof = 67
+				sprid_mio = 35
+				sprid_top = 19
+			end
+			if item.varient == 1 do
+				sprid_btm_noroof = 52
+				sprid_btm_wroof = 68
+				sprid_mio = 36
+				sprid_top = 20
+			elseif item.varient == 2 do
+				sprid_btm_noroof = 53
+				sprid_btm_wroof = 69
+				sprid_mio = 37
+				sprid_top = 21
+			end
+			
+			-- gen building
+			if item.height == 0 do
+				spr(sprid_btm_wroof,item.x,item.y-8)
+			end
+			if item.height > 0 do
+				spr(sprid_btm_noroof,item.x,item.y-8)
+				if item.height < 2 do
+					spr(sprid_top,item.x,item.y-16)
+				elseif item.height == 2 do
+					spr(sprid_mio,item.x,item.y-16)
+					spr(sprid_top,item.x,item.y-24)
+				end
+			end
+		end
+	end
+end
+end
+
 function init_bg()
 	bg_cx = bg_sx
 	bg_cy = bg_sy
@@ -211,7 +343,7 @@ function bg_prune()
 	for item in all(bg_obj_list) do
 		if item.x < -7 do
 			del(bg_obj_list,item)
-			bg_spawnnew()
+			bg_spawnnew(item.t)
 		end
 	end
 end
