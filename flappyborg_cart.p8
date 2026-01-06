@@ -30,9 +30,7 @@ function _update()
 	controls()
 	phys()
 	collission()
-	bg_shift()
 	bg2_shift()
-	bg_prune()
 	bg2_prune()
 	sprite_control()
 	if ftimer > 0 then
@@ -45,13 +43,11 @@ function _draw()
 	map()
 	spr(p.spid,p.x,p.y)
 	print("y: "..p.y, 1, 1)
-	print(bg_obj_list[1].x)
 	print(bg2_obj_list[1].t)
 	print(bg2_obj_list[1].x)
 	print(bg2_obj_list[1].y)
 	print(bg2_obj_list[1].speed)
 	scenes()
-	--draw_bg()
 	bg2_draw()
 end
 -->8
@@ -256,93 +252,6 @@ function bg2_draw()
 					spr(sprid_top,item.x,item.y-24)
 				end
 			end
-		end
-	end
-end
-
-function init_bg()
-	bg_cx = bg_sx
-	bg_cy = bg_sy
-	for i = 0,(bg_screen_pwidth/bg_obj_width) do
-		temp_var=flr(rnd(3))
-		temp_height=flr(rnd(bg_obj_mt_height))
-		item = {x=bg_cx,y=bg_cy,varient=temp_var,height=temp_height}
-		bg_cx -= bg_obj_width
-		add(bg_obj_list,item)
-	end
-end
-
-function draw_bg()
-	for item in all(bg_obj_list) do
-		if item.varient == 0 then
-			sprid_btm_noroof = 51
-			sprid_btm_wroof = 67
-			sprid_mio = 35
-			sprid_top = 19
-		end
-		if item.varient == 1 then
-			sprid_btm_noroof = 52
-			sprid_btm_wroof = 68
-			sprid_mio = 36
-			sprid_top = 20
-		elseif item.varient == 2 then
-			sprid_btm_noroof = 53
-			sprid_btm_wroof = 69
-			sprid_mio = 37
-			sprid_top = 21
-		end
-		--sprid_btm_noroof = 51
-		--sprid_btm_wroof = 67
-		--sprid_mio = 35
-		--sprid_top = 19
-		
-		spr(22,item.x,item.y)
-		--if item.height == 0 then
-		--	spr(sprid_btm_wroof,item.x,item.y-8) -- bottom floor with roof
-		--elseif item.height > 0 then
-		--	spr(sprid_btm_noroof,item.x,item.y) -- bottom floor no roof
-		--	if item.height == 2 then
-		--		spr(sprid_mio,item.x,item.y-16) -- mid floor
-		--		spr(sprid_top,item.x,item.y-24) -- top floor
-		--	else
-		--		spr(sprid_top,item.x,item.y-16) -- top floo
-		--	end
-		--end
-		if item.height == 0 then
-			spr(sprid_btm_wroof,item.x,item.y-8)
-		end
-		if item.height > 0 then
-			spr(sprid_btm_noroof,item.x,item.y-8)
-			if item.height < 2 then
-				spr(sprid_top,item.x,item.y-16)
-			elseif item.height == 2 then
-				spr(sprid_mio,item.x,item.y-16)
-				spr(sprid_top,item.x,item.y-24)
-			end
-		end
-	end
-end
-
-function bg_shift()
-	if g.frz==false then
-		for item in all(bg_obj_list) do
-			item.x-=1
-		end
-	end
-end
-
-function bg_spawnnew()
-	temp_var=flr(rnd(3))
-	temp_height=flr(rnd(bg_obj_mt_height))
-	item = {x=bg_sx,y=bg_sy,varient=temp_var,height=temp_height}
-	add(bg_obj_list,item)
-end
-
-function bg_prune()
-	for item in all(bg_obj_list) do
-		if item.x < -7 then
-			del(bg_obj_list,item)
-			bg_spawnnew(item.t)
 		end
 	end
 end
