@@ -22,7 +22,6 @@ function _init()
 	-- 2 death
 	g.scr=0 -- current score
 	g.frz = false -- freeze state
-	init_bg()
 	bg2_init()
 end
 
@@ -255,6 +254,29 @@ function bg2_draw()
 		end
 	end
 end
+-->8
+-- pillars --
+-- initialize (idk if ill use this tbh as it dont need to have any in first frames)
+function plr_init()
+end
+
+function plr_shift()
+end
+
+function plr_new()
+end
+
+function plr_prune()
+end
+
+function plr_draw()
+end
+
+--init
+--shift
+--new
+--prune
+--draw
 __gfx__
 00000000000000000000000099999999aaaaaaaabbbbbbbb33333333cccccccc1111111122222222eeeeeeee88888888c3bbbb3cc3bbbb3c5555555500000000
 0000000000aa77000000000099999999aaaaaaaabbbbbbbb33333333cccccccc1111111122222222eeeeeeee88888888c3bbbb3cc3bbbb3c5333333500000000
