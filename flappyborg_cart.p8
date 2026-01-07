@@ -4,6 +4,10 @@ __lua__
 -- game loop --
 
 function _init()
+
+	plr_spawn_delay = 60     -- 60 frames minimum between pillars
+	plr_spawn_timer = plr_spawn_delay -- start counting down from delay
+
 	-- player / borg --
 	p={} -- player table
 	p.x=56 -- player x cord.
@@ -15,6 +19,7 @@ function _init()
 	p.spid_up = 16
 	p.spid_dwn = 17
 	p.spid = p.spid_str
+	p.score = 0
 	-- game --
 	g={} -- game table
 	g.scn=0 -- current scene
@@ -36,19 +41,18 @@ function _update()
 	if ftimer > 0 then
 		ftimer -= 1
 	end
+	if stimer > 0 then
+		stimer -= 1
+	end
 	plr_shift()
+	plr_prune()
 end
 
 function _draw()
 	cls()
 	map()
 	spr(p.spid,p.x,p.y)
-	print("y: "..p.y, 1, 1)
-	print(bg2_obj_list[1].t)
-	print(bg2_obj_list[1].x)
-	print(bg2_obj_list[1].y)
-	print(bg2_obj_list[1].speed)
-	print(listfrom0to16)
+	print(p.score,1,1)
 	scenes()
 	plr_draw()
 	bg2_draw()
@@ -79,10 +83,17 @@ end
 -- player --
 function controls()
 	if g.frz==false then
-		if btn(⬆️) then
-			if p.y > 0 then
-				p.y-=p.step
-			end
+		if btn(⬆️) and p.y > 0 then
+			p.y-=p.step
+		end
+		if btn(⬇️) and p.y < 128 then
+			p.y+=p.step
+		end
+		if btn(➡️) and p.x < 120 then
+			p.x+=p.step
+		end
+		if btn(⬅️) and p.x > 0 then
+			p.x-=p.step
 		end
 	end
 end
@@ -291,27 +302,29 @@ end
 function plr_shift()
 	for obj in all(plr.obj_list) do
 		for item in all(obj) do
-			item.x+=1
+			item.x-=1
 		end
 	end
 end
 
 plr = {}
 plr.obj_list = {}
-plr.sx = 20
-plr.sy = -8
+plr.sx = 128
+plr.sy = 120
+plr.height = 8
 
 function plr_new()
+	-- set temp variables
 	obj = {}
-	listfrom0to16 = ""
 	cx = plr.sx
 	cy = plr.sy
-	gap = flr(rnd(2))+1
-	height = flr(rnd(16-(gap+1)))
-	if height < 5 then
-		height = 5
-	end
+	
+	-- dynamic variables
+	gap = flr(rnd(2)) + 1
+	height = flr(rnd(10 - gap)) + 5
 	topgap = height+gap
+	
+	
 	
 	--10-15 top
 	--9 top cap
@@ -319,41 +332,43 @@ function plr_new()
 	--6 bottomcap
 	--0-5 bottom
 	
-	-- why must everything i do
-	-- be made difficult! - 11:58pm author on 1/5/2026
-	
-	-- i have no clue why but spid
-	-- 13 (top cap) is going faster
-	-- then all other pieces and
-	-- i see 0 logical reason as
-	-- to why that is
 	for i = 1, 16 do
-		if i < height then -- bottom
-			item = {spid=1,x=plr.sx,y=plr.sy+(i*8),spid=12}
-		elseif i == height then -- bottom cap
-			item = {spid=1,x=plr.sx,y=plr.sy+(i*8),spid=13}
-		elseif i == height+gap+2 then -- top cap
-			item = {spid=1,x=plr.sx,y=plr.sy+(i*8),spid=14}
-		elseif i > height+gap+2 then -- top
-			item = {spid=1,x=plr.sx,y=plr.sy+(i*8),spid=12}
+		-- fix #2
+		-- so turns out yes fix #1 did
+		-- fix one issue however another
+		-- more "invisible" bug was happening
+		-- the best way i can explain it is that
+		-- lua doesnt treat functions the same
+		-- as loops in the way it makes local vars,
+		-- infact any vars are apparently
+		-- **always** global unless specified
+		-- so theoretically doing item == nil or
+		-- setting each item before adding to be
+		-- local item instead of just item
+		-- would fix it. i was unaware of this
+		-- until i was made aware of the discrepency
+		-- of var handling from my usual languages
+		-- and presumably most languages to lua
+		item = nil
+		
+		if i < height then
+			item={x=cx,y=cy,spid=12}
+		elseif i == height then
+			item={x=cx,y=cy,spid=14}
+		elseif i == height+gap+2 then
+			item={x=cx,y=cy,spid=13}
+		elseif i > height+gap+2 then
+			item={x=cx,y=cy,spid=12}
 		end
-		add(obj, item)
+		
+		-- fix #1
+		-- who would have thought adding if item would fix phantom speed increase of spid 13
+		-- essentialy in the gap it fits none so it adds top cap again and again meaning dupe ref
+		-- 3 to be specific meaning top cap moves 3x per frame.
+		if item then add(obj, item) end
+		cy -= plr.height
 	end
 	
-	
-	--for i = 1, 16 do
-	--	if i < height then
-	--		item = {spid=1,x=plr.sx,y=plr.sy+(i*8),spid=12}
-	--	elseif i == height then
-	--	 item = {spid=1,x=plr.sx,y=plr.sy+(i*8),spid=14}
-	--	--elseif i > height and i < topgap then
-	--	elseif i == topgap then
-	--		item = {spid=1,x=plr.sx,y=plr.sy+(i*8),spid=13}
-	--	elseif i > topgap then
-	--		item = {spid=1,x=plr.sx,y=plr.sy+(i*8),spid=12}
-	--	end
-		--item = {speed=1,x=plr.sx,y=plr.sy+(i*8),spid=1}
-	--end
 	add(plr.obj_list, obj)
 	-- item
 	--  x
@@ -363,7 +378,27 @@ function plr_new()
 	--  gap_height? (unsure how ill code gen rn)
 end
 
+-- frame-based timer for spawning
+--plr_spawn_timer = 30 -- frames until next pillar
+
+stimer = 0
+plrx = 0
+
 function plr_prune()
+ -- remove pillars off-screen
+ for obj in all(plr.obj_list) do
+  if obj[1].x < -8 then
+  	del(plr.obj_list,obj)
+  	p.score+=1
+ 	end
+	end
+
+	-- spawn new pillars at regular intervals
+ plr_spawn_timer -= 1
+ if plr_spawn_timer <= 0 then
+	 plr_new()
+  plr_spawn_timer = flr(rnd(30)) + 30 -- random delay 30-59 frames
+ end
 end
 
 function plr_draw()
