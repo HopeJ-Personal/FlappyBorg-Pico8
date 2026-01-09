@@ -331,7 +331,7 @@ function plr_new()
 	
 	obj = {}
 	obj.x = cx
-	obj.gap_top = plr.sy - ((height + gap + 2) * plr.height) + 16
+	obj.gap_top = plr.sy - ((height + gap + 2) * plr.height) + 15
 	obj.gap_bot = plr.sy - ((height + 1) * plr.height) + 17
 	obj.w = 8
 
