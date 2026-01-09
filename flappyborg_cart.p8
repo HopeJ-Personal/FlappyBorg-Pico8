@@ -50,10 +50,10 @@ end
 function _draw()
 	cls()
 	map()
-	spr(p.spid,p.x,p.y)
 	if btn(🅾️) then
 		pset(47,p.y,1)
 	end
+	spr(p.spid,p.x,p.y)
 	plr_draw()
 	bg2_draw()
 	print(p.score,1,1,1)
@@ -73,11 +73,10 @@ function scenes()
 end
 
 function menu()
-
 end
 
 function death()
-	local str = "bird crash"
+	local str = "uh oh- bird crash"
 	local x = 64 - (#str *2)
 	print(str, x, 61)
 end
@@ -331,7 +330,7 @@ function plr_new()
 	
 	obj = {}
 	obj.x = cx
-	obj.gap_top = plr.sy - ((height + gap + 2) * plr.height) + 15
+	obj.gap_top = plr.sy - ((height + gap + 2) * plr.height) + 16
 	obj.gap_bot = plr.sy - ((height + 1) * plr.height) + 17
 	obj.w = 8
 
