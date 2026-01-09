@@ -27,6 +27,7 @@ function _init()
 	-- 2 death
 	g.scr=0 -- current score
 	g.frz = false -- freeze state
+	g.debug = false
 	bg2_init()
 	plr_new()
 end
@@ -38,24 +39,25 @@ function _update()
 	bg2_shift()
 	bg2_prune()
 	sprite_control()
-	if ftimer > 0 then
-		ftimer -= 1
-	end
 	if stimer > 0 then
 		stimer -= 1
 	end
 	plr_shift()
 	plr_prune()
+	plr_collision()
 end
 
 function _draw()
 	cls()
 	map()
 	spr(p.spid,p.x,p.y)
-	print(p.score,1,1)
-	scenes()
+	if btn(🅾️) then
+		pset(47,p.y,1)
+	end
 	plr_draw()
 	bg2_draw()
+	print(p.score,1,1,1)
+	scenes()
 end
 -->8
 -- scenes --
@@ -96,6 +98,11 @@ function controls()
 			p.x-=p.step
 		end
 	end
+	if btn(❎) then
+		g.debug = true
+	else
+		g.debug = false
+	end
 end
 
 -- player: interactions --
@@ -116,18 +123,14 @@ function collission()
 	end
 end
 
-ftimer = 0
 function sprite_control()
 	if g.frz==false then
-		if btn(⬆️) then
+		if btn(⬆️) and (btn(⬇️)==false) then
 			p.spid = p.spid_up
-			ftimer = 30
+		elseif btn(⬇️) and (btn(⬆️)==false) then
+			p.spid = p.spid_dwn
 		else
-			if ftimer > 1 then
-				p.spid = p.spid_str
-			elseif ftimer == 1 then
-				p.spid = p.spid_dwn
-			end
+			p.spid = p.spid_str
 		end
 	end
 end
@@ -300,9 +303,12 @@ function plr_init()
 end
 
 function plr_shift()
-	for obj in all(plr.obj_list) do
-		for item in all(obj) do
-			item.x-=1
+	if g.frz==false then
+		for obj in all(plr.obj_list) do
+			obj.x -= 1
+			for item in all(obj) do
+				item.x-=1
+			end
 		end
 	end
 end
@@ -315,7 +321,6 @@ plr.height = 8
 
 function plr_new()
 	-- set temp variables
-	obj = {}
 	cx = plr.sx
 	cy = plr.sy
 	
@@ -324,7 +329,12 @@ function plr_new()
 	height = flr(rnd(10 - gap)) + 5
 	topgap = height+gap
 	
-	
+	obj = {}
+	obj.x = cx
+	obj.gap_top = plr.sy - ((height + gap + 2) * plr.height) + 16
+	obj.gap_bot = plr.sy - ((height + 1) * plr.height) + 17
+	obj.w = 8
+
 	
 	--10-15 top
 	--9 top cap
@@ -352,7 +362,11 @@ function plr_new()
 		item = nil
 		
 		if i < height then
-			item={x=cx,y=cy,spid=12}
+			if i == 0 then
+				item={x=cx,y=cy,spid=12}
+			else
+				item={x=cx,y=cy,spid=12}
+			end
 		elseif i == height then
 			item={x=cx,y=cy,spid=14}
 		elseif i == height+gap+2 then
@@ -386,10 +400,13 @@ plrx = 0
 
 function plr_prune()
  -- remove pillars off-screen
- for obj in all(plr.obj_list) do
-  if obj[1].x < -8 then
-  	del(plr.obj_list,obj)
-  	p.score+=1
+ if g.frz==false then
+ 	for obj in all(plr.obj_list) do
+ 	 if obj[1].x < -8 then
+ 	 	del(plr.obj_list,obj)
+ 		elseif obj[1].x == 50 then
+ 			p.score+=1
+ 		end
  	end
 	end
 
@@ -407,14 +424,57 @@ function plr_draw()
 			spr(item.spid,item.x,item.y)
 		end
 	end
+	if g.debug == true then
+		-- debug collision overlay
+		for obj in all(plr.obj_list) do
+			-- top solid
+			draw_hitbox(
+				obj.x,
+				0,
+				obj.w,
+				obj.gap_top,
+				8
+			)
+			
+			-- gap (safe zone)
+			draw_hitbox(
+				obj.x,
+				obj.gap_top,
+				obj.w,
+				obj.gap_bot - obj.gap_top,
+				11 -- green
+			)
+			
+			-- bottom solid
+			draw_hitbox(
+				obj.x,
+				obj.gap_bot,
+				obj.w,
+				128 - obj.gap_bot,
+				8 -- red
+			)
+		end
+		
+		-- player hitbox
+		draw_hitbox(p.x,p.y,8,8,1) -- blue (switched 12 to 1)
+	end
 end
 
--- functions required:
---init
---shift
---new
---prune
---draw
+function plr_collision()
+	for obj in all(plr.obj_list) do
+		if p.x+8 > obj.x and p.x < obj.x+obj.w then
+			if p.y < obj.gap_top or p.y+8 > obj.gap_bot then
+				g.frz = true
+				g.scn = 2
+				return
+			end
+		end
+	end
+end
+
+function draw_hitbox(x,y,w,h,col)
+	rect(x,y,x+w-1,y+h-1,col)
+end
 __gfx__
 00000000000000000000000099999999aaaaaaaabbbbbbbb33333333cccccccc1111111122222222eeeeeeee8888888803bbbb3003bbbb305555555500000000
 0000000000aa77000000000099999999aaaaaaaabbbbbbbb33333333cccccccc1111111122222222eeeeeeee8888888803bbbb3003bbbb305333333500000000
